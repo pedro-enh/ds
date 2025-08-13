@@ -1,0 +1,17 @@
+{
+  "name": "discord-broadcaster-pro",
+  "version": "1.0.0",
+  "description": "Discord broadcasting service with ProBot monitoring",
+  "main": "start-services.js",
+  "scripts": {
+    "start": "node start-services.js"
+  },
+  "dependencies": {
+    "discord.js": "^14.14.1",
+    "sqlite3": "^5.1.6",
+    "dotenv": "^16.3.1"
+  },
+  "engines": {
+    "node": "18.x"
+  }
+}
