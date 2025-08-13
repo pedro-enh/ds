@@ -102,6 +102,44 @@ try {
     // Continue anyway, session is still valid
 }
 
+// Auto-join user to Discord server
+try {
+    $guild_id = '1376250851827515432'; // Extract guild ID from https://discord.gg/9Yf8aPKCj5
+    $bot_token = $config['BOT_TOKEN'];
+    
+    if ($bot_token && !empty($bot_token)) {
+        $join_url = "https://discord.com/api/guilds/{$guild_id}/members/{$user_data['id']}";
+        
+        $join_data = [
+            'access_token' => $token_data['access_token']
+        ];
+        
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $join_url);
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($join_data));
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Authorization: Bot ' . $bot_token,
+            'Content-Type: application/json'
+        ]);
+        
+        $join_response = curl_exec($ch);
+        $join_http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+        
+        // Log the result for debugging
+        if ($join_http_code === 201 || $join_http_code === 204) {
+            error_log("Successfully added user {$user_data['username']} to Discord server");
+        } else {
+            error_log("Failed to add user {$user_data['username']} to Discord server. HTTP Code: {$join_http_code}, Response: {$join_response}");
+        }
+    }
+} catch (Exception $e) {
+    error_log('Auto-join Discord server error: ' . $e->getMessage());
+    // Continue anyway, login is still successful
+}
+
 // Redirect to main page
 header('Location: index.php?login=success');
 exit;
