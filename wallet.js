@@ -159,8 +159,25 @@ function startPaymentStatusCheck(paymentId, amount) {
 }
 
 // Check payment status
-async function checkPaymentStatus(paymentId, amount) {
+async function checkPaymentStatus(paymentId = null, amount = null) {
+    // Show loading state if button was clicked
+    const button = event?.target;
+    let originalText = '';
+    
+    if (button && button.tagName === 'BUTTON') {
+        originalText = button.innerHTML;
+        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Checking...';
+        button.disabled = true;
+    }
+    
     try {
+        // If no parameters provided, get from modal elements
+        if (!paymentId || !amount) {
+            const amountElement = document.getElementById('paymentAmount');
+            amount = amountElement ? parseInt(amountElement.textContent) : 5264;
+            paymentId = 1; // Default payment ID
+        }
+        
         const response = await fetch('wallet.php', {
             method: 'POST',
             headers: {
@@ -183,13 +200,30 @@ async function checkPaymentStatus(paymentId, amount) {
             // Refresh wallet info
             await refreshWalletInfo();
             
+            // Show success message
+            showToast('Payment confirmed! Credits added to your wallet.', 'success');
+            
             // Close modal after 3 seconds
             setTimeout(() => {
                 closePaymentModal();
             }, 3000);
+        } else {
+            updatePaymentStatus('waiting', 'Still waiting for payment...');
+            if (button && button.tagName === 'BUTTON') {
+                showToast('Payment not detected yet. Please try again in a few moments.', 'warning');
+            }
         }
     } catch (error) {
         console.error('Error checking payment status:', error);
+        if (button && button.tagName === 'BUTTON') {
+            showToast('Error checking payment status', 'error');
+        }
+    } finally {
+        // Restore button if it was clicked
+        if (button && button.tagName === 'BUTTON') {
+            button.innerHTML = originalText;
+            button.disabled = false;
+        }
     }
 }
 
