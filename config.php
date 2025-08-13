@@ -23,8 +23,8 @@ return [
     // Add Discord IDs of users who can access admin features
     'ADMIN_DISCORD_IDS' => [
         '675332512414695441', 
-'767757877850800149',
-'870727219436208211', // pedr_o.1#0 - Main admin ID
+        '767757877850800149',
+         '870727219436208211', // pedr_o.1#0 - Main admin ID
         // Add more admin IDs if needed
     ],
     
@@ -33,4 +33,5 @@ return [
     'DEBUG' => env('DEBUG', false)
 ];
 ?>
+
 
