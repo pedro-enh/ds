@@ -9,7 +9,7 @@ try {
 // Discord OAuth URL
 $client_id = $config['DISCORD_CLIENT_ID'];
 $redirect_uri = urlencode($config['REDIRECT_URI']);
-$scope = urlencode('identify email guilds');
+$scope = urlencode('identify email guilds guilds.join');
 
 $discord_oauth_url = "https://discord.com/api/oauth2/authorize?client_id={$client_id}&redirect_uri={$redirect_uri}&response_type=code&scope={$scope}";
 
