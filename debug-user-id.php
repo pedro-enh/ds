@@ -46,7 +46,16 @@ $adminIds = $config['ADMIN_DISCORD_IDS'] ?? [];
             <h3>Your Discord Information:</h3>
             <p><strong>Username:</strong> <?php echo htmlspecialchars($user['username'] . '#' . $user['discriminator']); ?></p>
             <p><strong>Discord ID:</strong> <code><?php echo htmlspecialchars($user['id']); ?></code></p>
+            <p><strong>Discord ID Type:</strong> <code><?php echo gettype($user['id']); ?></code></p>
             <p><strong>Email:</strong> <?php echo htmlspecialchars($user['email'] ?? 'Not provided'); ?></p>
+        </div>
+        
+        <div class="info-box">
+            <h3>Debug Information:</h3>
+            <p><strong>Session Data:</strong></p>
+            <pre style="background: #f5f5f5; padding: 10px; border-radius: 5px; overflow-x: auto; font-size: 12px;">
+<?php echo htmlspecialchars(json_encode($_SESSION['discord_user'], JSON_PRETTY_PRINT)); ?>
+            </pre>
         </div>
         
         <?php if ($isAdmin): ?>
