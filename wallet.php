@@ -290,7 +290,7 @@ $broadcasts = $db->getUserBroadcasts($user['id'], 10);
                             <i class="fas fa-robot"></i>
                             <div>
                                 <h4>Payment Detection</h4>
-                                <p>If your payment isn't detected automatically, you can ask support server discord in ticket support.</p>
+                                <p>If your payment isn't detected automatically, you can ask support server discord in <a href="https://discord.gg/sUpzDX8Fud" target="_blank" style="color: #5865f2; text-decoration: none; font-weight: bold;">ticket support</a>.</p>
                                 <button class="btn btn-info" onclick="runProbotMonitor()">
                                     <i class="fas fa-sync"></i>
                                     Check for Payments
@@ -423,7 +423,7 @@ $broadcasts = $db->getUserBroadcasts($user['id'], 10);
                                 <div class="step-number">1</div>
                                 <div class="step-content">
                                     <h4>Open Discord</h4>
-                                    <p>Go to any Discord server with ProBot</p>
+                                    <p>Go to <a href="https://discord.gg/sUpzDX8Fud" target="_blank" style="color: #5865f2; text-decoration: none; font-weight: bold;">Discord Server in Channel Transfer Link Server</a></p>
                                 </div>
                             </div>
                             
@@ -433,7 +433,7 @@ $broadcasts = $db->getUserBroadcasts($user['id'], 10);
                                     <h4>Send Credits</h4>
                                     <p>Use the command:</p>
                                     <div class="command-box">
-                                        <code id="paymentCommand">#credits <span id="recipientId">675332512414695441</span> <span id="paymentAmount">5000</span></code>
+                                        <code id="paymentCommand">#credits <span id="recipientId">675332512414695441</span> <span id="paymentAmount">5264</span></code>
                                         <button class="copy-btn" onclick="copyCommand()">
                                             <i class="fas fa-copy"></i>
                                         </button>
