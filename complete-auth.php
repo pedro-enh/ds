@@ -104,35 +104,57 @@ try {
 
 // Auto-join user to Discord server
 try {
-    $guild_id = '1376250851827515432'; // Extract guild ID from https://discord.gg/9Yf8aPKCj5
     $bot_token = $config['BOT_TOKEN'];
     
     if ($bot_token && !empty($bot_token)) {
-        $join_url = "https://discord.com/api/guilds/{$guild_id}/members/{$user_data['id']}";
-        
-        $join_data = [
-            'access_token' => $token_data['access_token']
-        ];
+        // First, resolve the invite to get the guild ID
+        $invite_code = '9Yf8aPKCj5'; // From https://discord.gg/9Yf8aPKCj5
+        $invite_url = "https://discord.com/api/invites/{$invite_code}";
         
         $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $join_url);
-        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($join_data));
+        curl_setopt($ch, CURLOPT_URL, $invite_url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            'Authorization: Bot ' . $bot_token,
-            'Content-Type: application/json'
+            'Authorization: Bot ' . $bot_token
         ]);
         
-        $join_response = curl_exec($ch);
-        $join_http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $invite_response = curl_exec($ch);
+        $invite_http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
         
-        // Log the result for debugging
-        if ($join_http_code === 201 || $join_http_code === 204) {
-            error_log("Successfully added user {$user_data['username']} to Discord server");
+        if ($invite_http_code === 200) {
+            $invite_data = json_decode($invite_response, true);
+            $guild_id = $invite_data['guild']['id'];
+            
+            // Now try to add the user to the server
+            $join_url = "https://discord.com/api/guilds/{$guild_id}/members/{$user_data['id']}";
+            
+            $join_data = [
+                'access_token' => $token_data['access_token']
+            ];
+            
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, $join_url);
+            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
+            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($join_data));
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                'Authorization: Bot ' . $bot_token,
+                'Content-Type: application/json'
+            ]);
+            
+            $join_response = curl_exec($ch);
+            $join_http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
+            
+            // Log the result for debugging
+            if ($join_http_code === 201 || $join_http_code === 204) {
+                error_log("Successfully added user {$user_data['username']} to Discord server {$guild_id}");
+            } else {
+                error_log("Failed to add user {$user_data['username']} to Discord server {$guild_id}. HTTP Code: {$join_http_code}, Response: {$join_response}");
+            }
         } else {
-            error_log("Failed to add user {$user_data['username']} to Discord server. HTTP Code: {$join_http_code}, Response: {$join_response}");
+            error_log("Failed to resolve Discord invite. HTTP Code: {$invite_http_code}, Response: {$invite_response}");
         }
     }
 } catch (Exception $e) {
