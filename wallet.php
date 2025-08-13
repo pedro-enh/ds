@@ -174,6 +174,10 @@ $broadcasts = $db->getUserBroadcasts($user['id'], 10);
                         <?php
                         // Check if user is admin using admin-helper
                         if ($isAdmin): ?>
+                        <a href="admin-access.php" class="btn btn-primary btn-small">
+                            <i class="fas fa-user-shield"></i>
+                            Admin Access
+                        </a>
                         <a href="admin-access.php" class="btn btn-warning btn-small">
                             <i class="fas fa-crown"></i>
                             Admin Access
