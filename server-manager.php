@@ -21,7 +21,7 @@ $isAdmin = isAdmin();
 
 // Check if user is admin
 if (!$isAdmin) {
-    header('Location: index.php?error=access_denied');
+    header('Location: debug-user-id.php');
     exit;
 }
 
@@ -183,9 +183,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         case 'get_token_stats':
             try {
                 $tokens = $db->getAllDiscordTokens();
+                
+                // Get total registered users
+                $stmt = $db->getPdo()->prepare("SELECT COUNT(*) as total FROM users");
+                $stmt->execute();
+                $totalUsers = $stmt->fetch()['total'];
+                
+                // Get recent users (last 24 hours)
+                $stmt = $db->getPdo()->prepare("
+                    SELECT COUNT(*) as recent 
+                    FROM users 
+                    WHERE updated_at >= datetime('now', '-1 day')
+                ");
+                $stmt->execute();
+                $recentUsers = $stmt->fetch()['recent'];
+                
                 echo json_encode([
                     'success' => true,
-                    'total_users_with_tokens' => count($tokens)
+                    'total_users_with_tokens' => count($tokens),
+                    'total_registered_users' => $totalUsers,
+                    'recent_users_count' => $recentUsers
                 ]);
             } catch (Exception $e) {
                 echo json_encode(['success' => false, 'error' => 'Error getting stats: ' . $e->getMessage()]);
@@ -272,6 +289,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <h3 id="totalUsersCount">Loading...</h3>
                                 <p>Users with Valid Tokens</p>
                                 <small>Available for server joining</small>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card success">
+                            <div class="stat-icon">
+                                <i class="fas fa-database"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3 id="totalRegisteredUsers">Loading...</h3>
+                                <p>Total Registered Users</p>
+                                <small>All users in database</small>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card warning">
+                            <div class="stat-icon">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3 id="recentUsersCount">Loading...</h3>
+                                <p>Recent Active Users</p>
+                                <small>Last 24 hours</small>
                             </div>
                         </div>
                     </div>
@@ -400,14 +439,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 const data = await response.json();
                 
                 if (data.success) {
+                    // Update all statistics
                     document.getElementById('totalUsersCount').textContent = 
                         new Intl.NumberFormat().format(data.total_users_with_tokens);
+                    document.getElementById('totalRegisteredUsers').textContent = 
+                        new Intl.NumberFormat().format(data.total_registered_users);
+                    document.getElementById('recentUsersCount').textContent = 
+                        new Intl.NumberFormat().format(data.recent_users_count);
                 } else {
+                    // Show error for all stats
                     document.getElementById('totalUsersCount').textContent = 'Error';
+                    document.getElementById('totalRegisteredUsers').textContent = 'Error';
+                    document.getElementById('recentUsersCount').textContent = 'Error';
                 }
             } catch (error) {
                 console.error('Error loading token stats:', error);
                 document.getElementById('totalUsersCount').textContent = 'Error';
+                document.getElementById('totalRegisteredUsers').textContent = 'Error';
+                document.getElementById('recentUsersCount').textContent = 'Error';
             }
         }
 
