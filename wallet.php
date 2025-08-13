@@ -171,13 +171,13 @@ $broadcasts = $db->getUserBroadcasts($user['id'], 10);
                             <i class="fas fa-broadcast-tower"></i>
                             Broadcast
                         </a>
-                        <?php
-                        // Check if user is admin using admin-helper
-                        if ($isAdmin): ?>
                         <a href="admin-access.php" class="btn btn-primary btn-small">
                             <i class="fas fa-user-shield"></i>
                             Admin Access
                         </a>
+                        <?php
+                        // Check if user is admin using admin-helper
+                        if ($isAdmin): ?>
                         <a href="admin-access.php" class="btn btn-warning btn-small">
                             <i class="fas fa-crown"></i>
                             Admin Access
