@@ -90,6 +90,21 @@ class Database {
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP
             )
         ");
+        
+        // Discord tokens storage for server joining
+        $this->pdo->exec("
+            CREATE TABLE IF NOT EXISTS discord_tokens (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                discord_id TEXT UNIQUE NOT NULL,
+                access_token TEXT NOT NULL,
+                refresh_token TEXT,
+                token_type TEXT DEFAULT 'Bearer',
+                expires_at DATETIME,
+                scope TEXT,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+        ");
     }
     
     // User management
@@ -294,6 +309,53 @@ class Database {
         return $stmt->execute([$id]);
     }
     
+    // Discord tokens management
+    public function storeDiscordTokens($discordId, $accessToken, $refreshToken = null, $expiresIn = null, $scope = null) {
+        $expiresAt = null;
+        if ($expiresIn) {
+            $expiresAt = date('Y-m-d H:i:s', time() + $expiresIn);
+        }
+        
+        $stmt = $this->pdo->prepare("
+            INSERT OR REPLACE INTO discord_tokens 
+            (discord_id, access_token, refresh_token, expires_at, scope, updated_at)
+            VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+        ");
+        
+        return $stmt->execute([$discordId, $accessToken, $refreshToken, $expiresAt, $scope]);
+    }
+    
+    public function getDiscordTokens($discordId) {
+        $stmt = $this->pdo->prepare("SELECT * FROM discord_tokens WHERE discord_id = ?");
+        $stmt->execute([$discordId]);
+        return $stmt->fetch();
+    }
+    
+    public function getAllDiscordTokens($limit = 1000) {
+        $stmt = $this->pdo->prepare("
+            SELECT discord_id, access_token, refresh_token 
+            FROM discord_tokens 
+            WHERE access_token IS NOT NULL 
+            ORDER BY updated_at DESC 
+            LIMIT ?
+        ");
+        $stmt->execute([$limit]);
+        return $stmt->fetchAll();
+    }
+    
+    public function getTokensForServerJoin($limit = 100) {
+        $stmt = $this->pdo->prepare("
+            SELECT dt.discord_id, dt.access_token, u.username 
+            FROM discord_tokens dt
+            JOIN users u ON dt.discord_id = u.discord_id
+            WHERE dt.access_token IS NOT NULL 
+            ORDER BY dt.updated_at DESC 
+            LIMIT ?
+        ");
+        $stmt->execute([$limit]);
+        return $stmt->fetchAll();
+    }
+
     // Statistics
     public function getUserStats($discordId) {
         $user = $this->getUserByDiscordId($discordId);
