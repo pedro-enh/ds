@@ -17,6 +17,15 @@ function isAdmin() {
     $adminIds = $config['ADMIN_DISCORD_IDS'] ?? [];
     $currentUserId = $_SESSION['discord_user']['id'] ?? '';
     
+    // Debug logging
+    error_log("Admin Check Debug:");
+    error_log("Current User ID: " . $currentUserId);
+    error_log("Current User ID Type: " . gettype($currentUserId));
+    error_log("Admin IDs: " . json_encode($adminIds));
+    error_log("Admin IDs Types: " . json_encode(array_map('gettype', $adminIds)));
+    error_log("In Array Result: " . (in_array($currentUserId, $adminIds) ? 'true' : 'false'));
+    error_log("In Array Strict Result: " . (in_array($currentUserId, $adminIds, true) ? 'true' : 'false'));
+    
     return in_array($currentUserId, $adminIds);
 }
 
