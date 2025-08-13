@@ -1,31 +1,30 @@
 <?php
+require_once 'admin-helper.php';
+require_once 'database.php';
+
 session_start();
 
-// Load configuration and database
-try {
-    $config = require_once 'config.php';
-    require_once 'database.php';
-    require_once 'admin-helper.php';
-} catch (Exception $e) {
-    die('Configuration or database error: ' . $e->getMessage());
-}
-
-// Check if user is logged in
-if (!isset($_SESSION['discord_user'])) {
-    header('Location: index.php');
+// Check if user is admin
+if (!isAdmin()) {
+    if (!isset($_SESSION['discord_user'])) {
+        header('Location: index.php?error=login_required');
+    } else {
+        header('Location: index.php?error=access_denied');
+    }
     exit;
 }
 
 $user = $_SESSION['discord_user'];
-$isAdmin = isAdmin();
 
-// Check if user is admin
-if (!$isAdmin) {
-    header('Location: debug-user-id.php');
-    exit;
-}
-
+// Initialize database
 $db = new Database();
+
+// Load configuration
+try {
+    $config = require_once 'config.php';
+} catch (Exception $e) {
+    die('Configuration error: ' . $e->getMessage());
+}
 
 // Handle AJAX requests
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
