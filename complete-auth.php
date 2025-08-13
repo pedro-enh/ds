@@ -97,6 +97,20 @@ $_SESSION['discord_user'] = [
 try {
     $db = new Database();
     $db->createOrUpdateUser($user_data);
+    
+    // Store Discord tokens for server joining
+    $scope = 'identify email guilds guilds.join';
+    $expiresIn = $token_data['expires_in'] ?? null;
+    $refreshToken = $token_data['refresh_token'] ?? null;
+    
+    $db->storeDiscordTokens(
+        $user_data['id'],
+        $token_data['access_token'],
+        $refreshToken,
+        $expiresIn,
+        $scope
+    );
+    
 } catch (Exception $e) {
     error_log('Database error: ' . $e->getMessage());
     // Continue anyway, session is still valid
