@@ -188,7 +188,7 @@ class ProbotMonitor {
     private function markTransferProcessed($messageId, $discordId, $amount) {
         $stmt = $this->db->getPdo()->prepare("
             INSERT INTO processed_transfers (message_id, discord_id, amount, processed_at)
-            VALUES (?, ?, ?, CURRENT_TIMESTAMP)
+            VALUES (?, ?, ?, NOW())
         ");
         
         // Create table if it doesn't exist
