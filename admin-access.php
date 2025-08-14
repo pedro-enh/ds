@@ -53,18 +53,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             if ($targetUser) {
                 // Update existing user
                 $newBalance = $targetUser['credits'] + $creditsAmount;
-                $stmt = $pdo->prepare("UPDATE users SET credits = ?, updated_at = CURRENT_TIMESTAMP WHERE discord_id = ?");
+                $stmt = $pdo->prepare("UPDATE users SET credits = ?, updated_at = NOW() WHERE discord_id = ?");
                 $stmt->execute([$newBalance, $targetUserId]);
             } else {
                 // Create new user with minimal data
-                $stmt = $pdo->prepare("INSERT INTO users (discord_id, username, discriminator, credits, created_at, updated_at) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)");
+                $stmt = $pdo->prepare("INSERT INTO users (discord_id, username, discriminator, credits, created_at, updated_at) VALUES (?, ?, ?, ?, NOW(), NOW())");
                 $stmt->execute([$targetUserId, 'Unknown', '0000', $creditsAmount]);
                 $newBalance = $creditsAmount;
                 $targetUser = ['id' => $pdo->lastInsertId()];
             }
             
             // Record transaction
-            $stmt = $pdo->prepare("INSERT INTO transactions (user_id, discord_id, type, amount, description, status, created_at) VALUES (?, ?, 'purchase', ?, ?, 'completed', CURRENT_TIMESTAMP)");
+            $stmt = $pdo->prepare("INSERT INTO transactions (user_id, discord_id, type, amount, description, status, created_at) VALUES (?, ?, 'purchase', ?, ?, 'completed', NOW())");
             $stmt->execute([$targetUser['id'], $targetUserId, $creditsAmount, "Admin: " . $reason]);
             
             echo json_encode([
