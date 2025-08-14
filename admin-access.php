@@ -347,7 +347,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             $stmt = $db->getPdo()->prepare("
                 SELECT COUNT(*) as recent 
                 FROM users 
-                WHERE updated_at >= datetime('now', '-1 day')
+                WHERE updated_at >= DATE_SUB(NOW(), INTERVAL 1 DAY)
             ");
             $stmt->execute();
             $recentUsers = $stmt->fetch()['recent'];
