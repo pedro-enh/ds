@@ -647,7 +647,7 @@ class Database {
         ];
         
         $stmt = $this->pdo->prepare("
-            SELECT COUNT(*) as total_broadcasts, SUM(messages_sent) as total_messages_sent
+            SELECT COUNT(*) as total_broadcasts, COALESCE(SUM(messages_sent), 0) as total_messages_sent
             FROM broadcasts 
             WHERE discord_id = ?
         ");
