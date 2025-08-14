@@ -1,0 +1,20 @@
+MySQL Database Configuration for Discord Broadcaster Pro
+========================================================
+
+Your MySQL Connection Details:
+- Host: sjc1.clusters.zeabur.com
+- Port: 31931
+- User: root
+- Password: eDwIb7210q6n8xC9o34RghJrlyzKFj5L
+- Database: zeabur
+
+DATABASE_URL Format:
+DATABASE_URL=mysql://root:eDwIb7210q6n8xC9o34RghJrlyzKFj5L@sjc1.clusters.zeabur.com:31931/zeabur
+
+Setup Instructions:
+1. Add this DATABASE_URL as an environment variable in your Zeabur deployment
+2. Redeploy your application
+3. Run: php setup-database.php (to test and create tables)
+4. Your data will now persist across all restarts!
+
+Note: Make sure to set this as an environment variable, not in your code files for security.
