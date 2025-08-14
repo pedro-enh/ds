@@ -150,7 +150,9 @@ function sendBroadcast($bot_token, $guild_id, $message, $target_type, $delay, $e
         // Personalize message with user mention if enabled
         $personalized_message = $message;
         if ($enable_mentions) {
+            // Replace {user} with actual Discord mention
             $personalized_message = str_replace('{user}', "<@{$user_id}>", $personalized_message);
+            // Replace {username} with actual username
             $personalized_message = str_replace('{username}', $member['user']['username'], $personalized_message);
         }
         
