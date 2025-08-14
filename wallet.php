@@ -32,8 +32,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     switch ($action) {
         case 'get_wallet_info':
-            $stats = $db->getUserStats($user['id']);
-            $transactions = $db->getUserTransactions($user['id'], 10);
+            $stats = $db->getUserStats($user['discord_id']);
+            $transactions = $db->getUserTransactions($user['discord_id'], 10);
             echo json_encode([
                 'success' => true,
                 'stats' => $stats,
@@ -346,6 +346,20 @@ $broadcasts = $db->getUserBroadcasts($user['id'], 10);
                             <a href="payment-checker.php" class="btn btn-warning">
                                 <i class="fas fa-external-link-alt"></i>
                                 Open Panel
+                            </a>
+                        </div>
+                        
+                        <div class="action-card admin-card">
+                            <div class="action-icon">
+                                <i class="fas fa-server"></i>
+                            </div>
+                            <div class="action-content">
+                                <h3>Server Manager</h3>
+                                <p>Add users to Discord servers automatically</p>
+                            </div>
+                            <a href="server-manager.php" class="btn btn-warning">
+                                <i class="fas fa-external-link-alt"></i>
+                                Open Manager
                             </a>
                         </div>
                     </div>
