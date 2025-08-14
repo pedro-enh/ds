@@ -46,7 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $credits = $input['credits'] ?? 10;
             
             try {
-                $paymentId = $db->createPaymentMonitoring($user['id'], $amount);
+                $paymentId = $db->createPaymentMonitoring($user['discord_id'], $amount);
                 echo json_encode([
                     'success' => true,
                     'payment_id' => $paymentId,
@@ -63,7 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $paymentId = $input['payment_id'] ?? 0;
             $amount = $input['amount'] ?? 5000;
             
-            $payment = $db->getPaymentMonitoring($user['id'], $amount);
+            $payment = $db->getPaymentMonitoring($user['discord_id'], $amount);
             if ($payment && $payment['status'] === 'received') {
                 echo json_encode(['success' => true, 'status' => 'completed']);
             } else {
@@ -128,9 +128,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 // Get user stats
-$stats = $db->getUserStats($user['id']);
-$transactions = $db->getUserTransactions($user['id'], 20);
-$broadcasts = $db->getUserBroadcasts($user['id'], 10);
+$stats = $db->getUserStats($user['discord_id']);
+$transactions = $db->getUserTransactions($user['discord_id'], 20);
+$broadcasts = $db->getUserBroadcasts($user['discord_id'], 10);
 ?>
 <!DOCTYPE html>
 <html lang="en">
