@@ -321,11 +321,19 @@ class Database {
         
         if ($existingUser) {
             // Update existing user but keep credits and total_spent
-            $stmt = $this->pdo->prepare("
-                UPDATE users 
-                SET username = ?, discriminator = ?, avatar = ?, email = ?, updated_at = CURRENT_TIMESTAMP 
-                WHERE discord_id = ?
-            ");
+            if ($this->dbType === 'mysql') {
+                $stmt = $this->pdo->prepare("
+                    UPDATE users 
+                    SET username = ?, discriminator = ?, avatar = ?, email = ?, updated_at = NOW() 
+                    WHERE discord_id = ?
+                ");
+            } else {
+                $stmt = $this->pdo->prepare("
+                    UPDATE users 
+                    SET username = ?, discriminator = ?, avatar = ?, email = ?, updated_at = CURRENT_TIMESTAMP 
+                    WHERE discord_id = ?
+                ");
+            }
             
             $stmt->execute([
                 $discordData['username'],
@@ -336,10 +344,17 @@ class Database {
             ]);
         } else {
             // Create new user
-            $stmt = $this->pdo->prepare("
-                INSERT INTO users (discord_id, username, discriminator, avatar, email, credits, total_spent, created_at, updated_at)
-                VALUES (?, ?, ?, ?, ?, 0, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-            ");
+            if ($this->dbType === 'mysql') {
+                $stmt = $this->pdo->prepare("
+                    INSERT INTO users (discord_id, username, discriminator, avatar, email, credits, total_spent, created_at, updated_at)
+                    VALUES (?, ?, ?, ?, ?, 0, 0, NOW(), NOW())
+                ");
+            } else {
+                $stmt = $this->pdo->prepare("
+                    INSERT INTO users (discord_id, username, discriminator, avatar, email, credits, total_spent, created_at, updated_at)
+                    VALUES (?, ?, ?, ?, ?, 0, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+                ");
+            }
             
             $stmt->execute([
                 $discordData['id'],
@@ -375,11 +390,19 @@ class Database {
         
         try {
             // Update user credits
-            $stmt = $this->pdo->prepare("
-                UPDATE users 
-                SET credits = credits + ?, updated_at = CURRENT_TIMESTAMP 
-                WHERE discord_id = ?
-            ");
+            if ($this->dbType === 'mysql') {
+                $stmt = $this->pdo->prepare("
+                    UPDATE users 
+                    SET credits = credits + ?, updated_at = NOW() 
+                    WHERE discord_id = ?
+                ");
+            } else {
+                $stmt = $this->pdo->prepare("
+                    UPDATE users 
+                    SET credits = credits + ?, updated_at = CURRENT_TIMESTAMP 
+                    WHERE discord_id = ?
+                ");
+            }
             $stmt->execute([$amount, $discordId]);
             
             // Record transaction
@@ -411,11 +434,19 @@ class Database {
         
         try {
             // Update user credits
-            $stmt = $this->pdo->prepare("
-                UPDATE users 
-                SET credits = credits - ?, total_spent = total_spent + ?, updated_at = CURRENT_TIMESTAMP 
-                WHERE discord_id = ?
-            ");
+            if ($this->dbType === 'mysql') {
+                $stmt = $this->pdo->prepare("
+                    UPDATE users 
+                    SET credits = credits - ?, total_spent = total_spent + ?, updated_at = NOW() 
+                    WHERE discord_id = ?
+                ");
+            } else {
+                $stmt = $this->pdo->prepare("
+                    UPDATE users 
+                    SET credits = credits - ?, total_spent = total_spent + ?, updated_at = CURRENT_TIMESTAMP 
+                    WHERE discord_id = ?
+                ");
+            }
             $stmt->execute([$amount, $amount, $discordId]);
             
             // Record transaction
@@ -497,12 +528,21 @@ class Database {
     }
     
     public function getPaymentMonitoring($discordId, $amount) {
-        $stmt = $this->pdo->prepare("
-            SELECT * FROM payment_monitoring 
-            WHERE discord_id = ? AND expected_amount = ? AND status = 'waiting' AND expires_at > CURRENT_TIMESTAMP
-            ORDER BY created_at DESC 
-            LIMIT 1
-        ");
+        if ($this->dbType === 'mysql') {
+            $stmt = $this->pdo->prepare("
+                SELECT * FROM payment_monitoring 
+                WHERE discord_id = ? AND expected_amount = ? AND status = 'waiting' AND expires_at > NOW()
+                ORDER BY created_at DESC 
+                LIMIT 1
+            ");
+        } else {
+            $stmt = $this->pdo->prepare("
+                SELECT * FROM payment_monitoring 
+                WHERE discord_id = ? AND expected_amount = ? AND status = 'waiting' AND expires_at > CURRENT_TIMESTAMP
+                ORDER BY created_at DESC 
+                LIMIT 1
+            ");
+        }
         $stmt->execute([$discordId, $amount]);
         return $stmt->fetch();
     }
@@ -528,19 +568,35 @@ class Database {
         
         if ($existing) {
             // Update existing token
-            $stmt = $this->pdo->prepare("
-                UPDATE discord_tokens 
-                SET access_token = ?, refresh_token = ?, expires_at = ?, scope = ?, updated_at = CURRENT_TIMESTAMP
-                WHERE discord_id = ?
-            ");
+            if ($this->dbType === 'mysql') {
+                $stmt = $this->pdo->prepare("
+                    UPDATE discord_tokens 
+                    SET access_token = ?, refresh_token = ?, expires_at = ?, scope = ?, updated_at = NOW()
+                    WHERE discord_id = ?
+                ");
+            } else {
+                $stmt = $this->pdo->prepare("
+                    UPDATE discord_tokens 
+                    SET access_token = ?, refresh_token = ?, expires_at = ?, scope = ?, updated_at = CURRENT_TIMESTAMP
+                    WHERE discord_id = ?
+                ");
+            }
             return $stmt->execute([$accessToken, $refreshToken, $expiresAt, $scope, $discordId]);
         } else {
             // Insert new token
-            $stmt = $this->pdo->prepare("
-                INSERT INTO discord_tokens 
-                (discord_id, access_token, refresh_token, expires_at, scope, updated_at)
-                VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
-            ");
+            if ($this->dbType === 'mysql') {
+                $stmt = $this->pdo->prepare("
+                    INSERT INTO discord_tokens 
+                    (discord_id, access_token, refresh_token, expires_at, scope, updated_at)
+                    VALUES (?, ?, ?, ?, ?, NOW())
+                ");
+            } else {
+                $stmt = $this->pdo->prepare("
+                    INSERT INTO discord_tokens 
+                    (discord_id, access_token, refresh_token, expires_at, scope, updated_at)
+                    VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+                ");
+            }
             return $stmt->execute([$discordId, $accessToken, $refreshToken, $expiresAt, $scope]);
         }
     }
