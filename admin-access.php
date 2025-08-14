@@ -131,8 +131,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         try {
             $config = require_once 'config.php';
             $botToken = $config['BOT_TOKEN'];
-            if (!$botToken) {
-                echo json_encode(['success' => false, 'message' => 'Bot token not configured']);
+            
+            if (!$botToken || empty(trim($botToken))) {
+                echo json_encode([
+                    'success' => false, 
+                    'message' => 'Bot token not configured. Please set DISCORD_BOT_TOKEN environment variable.',
+                    'debug' => [
+                        'bot_token_set' => !empty($botToken),
+                        'config_loaded' => true
+                    ]
+                ]);
                 exit;
             }
             
@@ -142,31 +150,93 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             $ch = curl_init();
             curl_setopt($ch, CURLOPT_URL, $url);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+            curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($ch, CURLOPT_USERAGENT, 'Discord Broadcaster Pro/1.0');
             curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                'Authorization: Bot ' . $botToken
+                'Authorization: Bot ' . $botToken,
+                'Content-Type: application/json'
             ]);
             
             $response = curl_exec($ch);
             $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            $curlError = curl_error($ch);
             curl_close($ch);
+            
+            if ($curlError) {
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Network error: ' . $curlError,
+                    'debug' => [
+                        'curl_error' => $curlError,
+                        'http_code' => $httpCode
+                    ]
+                ]);
+                exit;
+            }
             
             if ($httpCode === 200) {
                 $guildData = json_decode($response, true);
+                if ($guildData) {
+                    echo json_encode([
+                        'success' => true,
+                        'bot_in_server' => true,
+                        'guild_name' => $guildData['name'] ?? 'Unknown',
+                        'member_count' => $guildData['approximate_member_count'] ?? 'Unknown'
+                    ]);
+                } else {
+                    echo json_encode([
+                        'success' => false,
+                        'message' => 'Invalid response from Discord API',
+                        'debug' => [
+                            'http_code' => $httpCode,
+                            'response' => $response
+                        ]
+                    ]);
+                }
+            } elseif ($httpCode === 401) {
                 echo json_encode([
-                    'success' => true,
-                    'bot_in_server' => true,
-                    'guild_name' => $guildData['name'],
-                    'member_count' => $guildData['approximate_member_count'] ?? 'Unknown'
+                    'success' => false,
+                    'message' => 'Invalid bot token. Please check DISCORD_BOT_TOKEN environment variable.',
+                    'debug' => [
+                        'http_code' => $httpCode,
+                        'token_length' => strlen($botToken)
+                    ]
                 ]);
-            } else {
+            } elseif ($httpCode === 403) {
                 echo json_encode([
                     'success' => true,
                     'bot_in_server' => false,
-                    'message' => 'Bot is not in this server or server does not exist'
+                    'message' => 'Bot does not have access to this server'
+                ]);
+            } elseif ($httpCode === 404) {
+                echo json_encode([
+                    'success' => true,
+                    'bot_in_server' => false,
+                    'message' => 'Server not found or bot is not in this server'
+                ]);
+            } else {
+                $errorData = json_decode($response, true);
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Discord API error: ' . ($errorData['message'] ?? 'Unknown error'),
+                    'debug' => [
+                        'http_code' => $httpCode,
+                        'response' => $response
+                    ]
                 ]);
             }
         } catch (Exception $e) {
-            echo json_encode(['success' => false, 'message' => 'Error verifying bot: ' . $e->getMessage()]);
+            echo json_encode([
+                'success' => false, 
+                'message' => 'Error verifying bot: ' . $e->getMessage(),
+                'debug' => [
+                    'exception' => $e->getMessage(),
+                    'file' => $e->getFile(),
+                    'line' => $e->getLine()
+                ]
+            ]);
         }
         exit;
     }
