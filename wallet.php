@@ -32,8 +32,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     switch ($action) {
         case 'get_wallet_info':
-            $stats = $db->getUserStats($user['discord_id']);
-            $transactions = $db->getUserTransactions($user['discord_id'], 10);
+            $discordId = $user['id']; // Discord ID is stored as 'id' in session
+            $stats = $db->getUserStats($discordId);
+            $transactions = $db->getUserTransactions($discordId, 10);
             echo json_encode([
                 'success' => true,
                 'stats' => $stats,
@@ -46,7 +47,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $credits = $input['credits'] ?? 10;
             
             try {
-                $paymentId = $db->createPaymentMonitoring($user['discord_id'], $amount);
+                $discordId = $user['id']; // Discord ID is stored as 'id' in session
+                $paymentId = $db->createPaymentMonitoring($discordId, $amount);
                 echo json_encode([
                     'success' => true,
                     'payment_id' => $paymentId,
@@ -63,7 +65,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $paymentId = $input['payment_id'] ?? 0;
             $amount = $input['amount'] ?? 5000;
             
-            $payment = $db->getPaymentMonitoring($user['discord_id'], $amount);
+            $discordId = $user['id']; // Discord ID is stored as 'id' in session
+            $payment = $db->getPaymentMonitoring($discordId, $amount);
             if ($payment && $payment['status'] === 'received') {
                 echo json_encode(['success' => true, 'status' => 'completed']);
             } else {
@@ -128,9 +131,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 // Get user stats
-$stats = $db->getUserStats($user['discord_id']);
-$transactions = $db->getUserTransactions($user['discord_id'], 20);
-$broadcasts = $db->getUserBroadcasts($user['discord_id'], 10);
+$discordId = $user['id']; // Discord ID is stored as 'id' in session
+$stats = $db->getUserStats($discordId);
+$transactions = $db->getUserTransactions($discordId, 20);
+$broadcasts = $db->getUserBroadcasts($discordId, 10);
 ?>
 <!DOCTYPE html>
 <html lang="en">
