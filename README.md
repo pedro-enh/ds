@@ -4,7 +4,7 @@
 
 ## Features
 - 📨 Mass Direct Message Broadcasting
-- 💰 Built-in Wallet System
+- 💰 Built-in Wallet 
 - 🔒 Discord OAuth Authentication
 - 📊 Real-time Progress Tracking
 
